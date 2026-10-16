@@ -159,7 +159,8 @@
       <div class="captcha">
         <div class="muted">VERIFIKASI ANTI ROBOT</div>
         <p class="challenge" id="challengeText">Menyiapkan kode...</p>
-        <label for="captchaInput">Ketik ulang teks setelah "KETIK ULANG"</label>
+        <button class="secondary" type="button" id="refreshCaptchaBtn">Ganti kode ↻</button>
+        <label for="captchaInput">Ketik ulang kode di atas</label>
         <input id="captchaInput" name="captchaInput" autocomplete="off" required placeholder="Ketik kode di atas">
       </div>
 
@@ -194,24 +195,43 @@
   const $ = (id) => document.getElementById(id);
   const form = $('answerForm');
 
-  // CAPTCHA acak: huruf yang mudah tertukar tidak digunakan.
-  function generateCaptcha() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    return Array.from({ length: 5 }, () =>
-      chars[Math.floor(Math.random() * chars.length)]
-    ).join('');
-  }
+  let captchaToken = '';
+  let captchaLoading = false;
 
-  let challenge = '';
-
-  function refreshCaptcha() {
-    challenge = generateCaptcha();
-    $('challengeText').textContent = 'KETIK ULANG ' + challenge;
+  async function refreshCaptcha() {
+    const btn = $('refreshCaptchaBtn');
+    captchaLoading = true;
+    btn.disabled = true;
+    $('challengeText').textContent = 'Memuat kode...';
     $('captchaInput').value = '';
+    $('formStatus').textContent = '';
+
+    try {
+      const res = await fetch('/.netlify/functions/captcha', {
+        method: 'GET',
+        cache: 'no-store'
+      });
+      const result = await res.json();
+
+      if (!res.ok || !result.code || !result.token) {
+        throw new Error(result.error || 'Gagal memuat CAPTCHA.');
+      }
+
+      $('challengeText').textContent = 'KETIK ULANG ' + result.code;
+      captchaToken = result.token;
+    } catch (error) {
+      captchaToken = '';
+      $('challengeText').textContent = 'CAPTCHA gagal dimuat.';
+      $('formStatus').textContent = error.message || 'Gagal memuat CAPTCHA.';
+      $('formStatus').className = 'muted danger';
+    } finally {
+      captchaLoading = false;
+      btn.disabled = false;
+    }
   }
 
-  // Buat CAPTCHA saat halaman pertama kali dibuka.
   refreshCaptcha();
+  $('refreshCaptchaBtn').addEventListener('click', refreshCaptcha);
 
   const params = new URLSearchParams(location.search);
   if (params.get('admin') === '1') showAdminPrompt();
@@ -219,13 +239,9 @@
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const typed = $('captchaInput').value.trim();
-
-    if (typed.toUpperCase() !== challenge) {
-      refreshCaptcha();
-      $('formStatus').textContent = 'CAPTCHA salah, bang. Kodenya sudah diganti, coba lagi!';
+    if (captchaLoading || !captchaToken) {
+      $('formStatus').textContent = 'Tunggu CAPTCHA selesai dimuat.';
       $('formStatus').className = 'muted danger';
-      $('captchaInput').focus();
       return;
     }
 
@@ -233,9 +249,12 @@
     btn.disabled = true;
     btn.textContent = 'Mengirim...';
     $('formStatus').textContent = '';
+    $('formStatus').className = 'muted';
 
     const data = Object.fromEntries(new FormData(form).entries());
-data.captchaInput = typed.toUpperCase();
+    data.captchaInput = data.captchaInput.trim().toUpperCase();
+    data.captchaToken = captchaToken;
+
     try {
       const res = await fetch('/.netlify/functions/submit', {
         method: 'POST',
@@ -251,7 +270,7 @@ data.captchaInput = typed.toUpperCase();
     } catch (err) {
       $('formStatus').textContent = err.message || 'Gagal mengirim. Coba lagi.';
       $('formStatus').className = 'muted danger';
-      refreshCaptcha();
+      await refreshCaptcha();
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'Kirim jawaban <span aria-hidden="true">→</span>';
@@ -260,11 +279,11 @@ data.captchaInput = typed.toUpperCase();
 
   $('againBtn').addEventListener('click', () => {
     form.reset();
-    refreshCaptcha();
     $('formStatus').textContent = '';
     $('formStatus').className = 'muted';
     $('successPanel').classList.add('hide');
     $('formPanel').classList.remove('hide');
+    refreshCaptcha();
   });
 
   function showAdminPrompt() {
@@ -327,7 +346,6 @@ data.captchaInput = typed.toUpperCase();
     $('adminPanel').classList.add('hide');
   });
 
-  // Efek maskot saat halaman diklik.
   let lastMascotTime = 0;
 
   document.addEventListener('click', (event) => {
@@ -351,4 +369,3 @@ data.captchaInput = typed.toUpperCase();
 </script>
 </body>
 </html>
-
