@@ -73,7 +73,7 @@ jobs:
                   stringArrayShuffle: true,
                   stringArrayIndexShift: true,
                   stringArrayWrappersCount: 2,
-                  stringArrayWrappersType: ['function', 'variable'],
+                  stringArrayWrappersType: 'function',
 
                   splitStrings: true,
                   splitStringsChunkLength: 5,
