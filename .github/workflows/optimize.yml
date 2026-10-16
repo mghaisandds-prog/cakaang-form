@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   optimize:
@@ -20,32 +20,53 @@ jobs:
         with:
           node-version: 22
 
-      - name: Optimasi HTML, CSS, dan JavaScript
+      - name: Pasang alat optimasi
         run: |
-          npm install --no-save html-minifier-terser clean-css terser
+          npm install --no-save html-minifier-terser javascript-obfuscator
+
+      - name: Optimasi HTML dan obfuscate JavaScript
+        run: |
           node <<'NODE'
           const fs = require('fs');
           const { minify } = require('html-minifier-terser');
+          const JavaScriptObfuscator = require('javascript-obfuscator');
 
           (async () => {
             const html = fs.readFileSync('index.html', 'utf8');
+
             const result = await minify(html, {
               collapseWhitespace: true,
               removeComments: true,
               minifyCSS: true,
-              minifyJS: true,
+              minifyJS: false,
               keepClosingSlash: true
             });
 
-            fs.writeFileSync('index.min.html', result);
-            console.log('Selesai: index.min.html dibuat.');
+            const obfuscated = result.replace(
+              /<script>([\s\S]*?)<\/script>/i,
+              (_, script) => {
+                const output = JavaScriptObfuscator.obfuscate(script, {
+                  compact: true,
+                  controlFlowFlattening: false,
+                  deadCodeInjection: false,
+                  stringArray: true,
+                  stringArrayThreshold: 0.5,
+                  renameGlobals: false
+                }).getObfuscatedCode();
+
+                return '<script>' + output + '</script>';
+              }
+            );
+
+            fs.writeFileSync('index.min.html', obfuscated);
+            console.log('Hasil dibuat: index.min.html');
           })().catch(error => {
             console.error(error);
             process.exit(1);
           });
           NODE
 
-      - name: Simpan hasil optimasi sebagai artifact
+      - name: Simpan hasil optimasi
         uses: actions/upload-artifact@v4
         with:
           name: optimized-website
