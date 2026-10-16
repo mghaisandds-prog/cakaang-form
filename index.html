@@ -282,11 +282,17 @@
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
     } catch (err) {
-      $('formStatus').textContent =
-        err.message || 'Gagal mengirim. Coba lagi.';
-      $('formStatus').className = 'muted danger';
+  const message = err.message || 'Gagal mengirim. Coba lagi.';
 
-      await refreshCaptcha(true);
+  $('formStatus').textContent =
+    /captcha|verification|kode verifikasi/i.test(message)
+      ? 'CAPTCHA salah atau kedaluwarsa. Silakan masukkan kode baru.'
+      : message;
+
+  $('formStatus').className = 'muted danger';
+
+  await refreshCaptcha(true);
+    }
     } finally {
       btn.disabled = false;
       btn.innerHTML =
