@@ -165,7 +165,7 @@
       </div>
 
       <button type="submit" id="submitBtn">Kirim jawaban <span aria-hidden="true">→</span></button>
-      <p id="formStatus" class="muted" role="status"></p>
+      <p id="formStatus" class="muted" role="status" aria-live="polite"></p>
     </form>
   </section>
 
@@ -270,8 +270,16 @@
         body: JSON.stringify(data)
       });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Pengiriman gagal.');
+      let result;
+      try {
+        result = await res.json();
+      } catch {
+        throw new Error('Respons server tidak terbaca (HTTP ' + res.status + ').');
+      }
+
+      if (!res.ok) {
+        throw new Error(result.error || 'Pengiriman gagal (HTTP ' + res.status + ').');
+      }
 
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
@@ -279,9 +287,13 @@
       const status = $('formStatus');
       const message = err.message || 'Gagal mengirim. Coba lagi.';
 
+      status.textContent = 'DEBUG: ' + message;
+      status.className = 'muted danger';
+
       await refreshCaptcha(true);
 
-      status.textContent = message;
+      status.textContent = 'DEBUG: ' + message +
+        (captchaToken ? ' | CAPTCHA diperbarui.' : ' | CAPTCHA gagal diperbarui.');
       status.className = 'muted danger';
     } finally {
       btn.disabled = false;
