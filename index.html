@@ -4,17 +4,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5ead5">
-  <title>Tung Tung Sahur</title>
+  <meta name="theme-color" content="#f8f4ec">
+  <title>Tung Tung Club</title>
+
   <style>
     :root {
-      --bg: #f5ead5;
-      --panel: #fff9ed;
-      --line: #493124;
-      --text: #352319;
-      --muted: #786554;
-      --accent: #c94b32;
-      --soft: #e7c99b;
+      --bg: #f8f4ec;
+      --paper: #fffdf8;
+      --text: #302820;
+      --muted: #81766a;
+      --line: #e4dbcd;
+      --accent: #a34330;
+      --soft: #efe5d6;
     }
 
     * {
@@ -23,55 +24,79 @@
 
     body {
       margin: 0;
-      padding: 22px 16px;
+      padding: 38px 20px 24px;
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      font: 16px/1.55 Arial, sans-serif;
+      font: 15px/1.65 Arial, sans-serif;
     }
 
     main {
-      max-width: 600px;
+      width: 100%;
+      max-width: 500px;
       margin: 0 auto;
     }
 
     .brand {
-      display: inline-block;
-      padding: 5px 9px;
-      border: 2px solid var(--line);
-      background: var(--soft);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .brand::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
     }
 
     h1 {
-      margin: 22px 0 10px;
-      font-size: clamp(2.1rem, 8vw, 3.1rem);
-      line-height: 1.05;
-      letter-spacing: -1.5px;
+      margin: 28px 0 14px;
+      font: 400 clamp(2.5rem, 10vw, 3.7rem)/1.03 Georgia, serif;
+      letter-spacing: -1.8px;
     }
 
     h2 {
-      margin-top: 0;
+      margin: 0 0 12px;
+      font: 400 1.65rem/1.2 Georgia, serif;
     }
 
     p {
       color: var(--muted);
     }
 
-    .panel {
-      margin-top: 22px;
-      padding: 22px;
-      background: var(--panel);
-      border: 2px solid var(--line);
-      border-radius: 7px;
-      box-shadow: 4px 4px 0 var(--line);
+    .intro {
+      max-width: 390px;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .rule {
+      height: 1px;
+      margin: 28px 0;
+      border: 0;
+      background: var(--line);
+    }
+
+    .section-label {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
     }
 
     label {
       display: block;
-      margin: 17px 0 6px;
+      margin: 19px 0 7px;
+      font-size: 13px;
       font-weight: 700;
     }
 
@@ -79,36 +104,50 @@
     textarea {
       display: block;
       width: 100%;
-      padding: 12px;
-      border: 2px solid #cbb99e;
-      border-radius: 5px;
-      background: #fffdf8;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: var(--paper);
       color: var(--text);
       font: inherit;
+      transition: border-color .18s;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #a69a8c;
     }
 
     input:focus,
     textarea:focus {
-      outline: 2px solid var(--accent);
+      outline: none;
       border-color: var(--accent);
     }
 
+    textarea {
+      resize: vertical;
+    }
+
     button {
-      margin-top: 18px;
-      padding: 12px 16px;
-      border: 2px solid var(--line);
-      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 12px 17px;
+      border: 1px solid var(--accent);
+      border-radius: 3px;
       background: var(--accent);
       color: white;
       font: inherit;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 3px 3px 0 var(--line);
+      transition: background .15s;
     }
 
-    button:active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0 var(--line);
+    button:hover {
+      background: #853725;
     }
 
     button:disabled {
@@ -117,12 +156,17 @@
     }
 
     button.secondary {
-      background: var(--soft);
+      border-color: var(--line);
+      background: transparent;
       color: var(--text);
     }
 
+    button.secondary:hover {
+      background: var(--soft);
+    }
+
     .muted {
-      font-size: .88rem;
+      font-size: 12px;
       color: var(--muted);
     }
 
@@ -131,25 +175,25 @@
     }
 
     .captcha {
-      margin-top: 18px;
-      padding: 14px;
-      border: 2px dashed #a68a68;
-      border-radius: 5px;
-      background: var(--bg);
+      margin-top: 24px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: #f1e9dc;
     }
 
     .challenge {
+      margin: 8px 0;
       color: var(--accent);
-      font-size: 1.1rem;
-      font-weight: 900;
-      letter-spacing: 2px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 3px;
     }
 
     .notice {
       margin-top: 14px;
       padding: 12px;
       border: 1px solid var(--line);
-      background: var(--bg);
       color: var(--text);
       overflow-wrap: anywhere;
     }
@@ -161,19 +205,19 @@
     .entry {
       margin: 12px 0;
       padding: 14px;
-      border: 2px solid var(--line);
-      border-radius: 5px;
-      background: #fffdf8;
+      border: 1px solid var(--line);
+      background: var(--paper);
       overflow-wrap: anywhere;
     }
 
     .entry h3 {
       margin: 0 0 8px;
-      font-size: 1rem;
+      font-size: 14px;
     }
 
     .entry p {
       margin: 5px 0;
+      font-size: 13px;
     }
 
     .toprow {
@@ -184,51 +228,99 @@
       gap: 12px;
     }
 
+    #formPanel,
+    #successPanel,
+    #adminPanel {
+      margin-top: 30px;
+      padding: 25px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
     footer {
-      max-width: 600px;
-      margin: 25px auto 0;
+      max-width: 500px;
+      margin: 32px auto 0;
       color: var(--muted);
-      font-size: .8rem;
+      font-size: 10px;
+      letter-spacing: 1.5px;
       text-align: center;
     }
 
-    @media (max-width: 480px) {
-      .panel {
-        padding: 17px;
+    /* Tung Tung muncul sebentar di lokasi klik */
+
+    .floating-mascot {
+      position: fixed;
+      z-index: 9999;
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      will-change: transform, opacity;
+      animation: sahur-float 1s ease-out forwards;
+    }
+
+    @keyframes sahur-float {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -15%) scale(.65) rotate(-10deg);
+      }
+
+      20% {
+        opacity: .95;
+        transform: translate(-50%, -50%) scale(1) rotate(5deg);
+      }
+
+      70% {
+        opacity: .7;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -145%) scale(.85) rotate(12deg);
       }
     }
 
-body {
-  position: relative;
-  isolation: isolate;
-  background: #f5ead5;
-}
+    @media (max-width: 480px) {
+      body {
+        padding: 29px 20px 20px;
+      }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image: url("./tungtung.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 300px auto;
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: -1;
-}
+      #formPanel,
+      #successPanel,
+      #adminPanel {
+        padding: 21px 0;
+      }
+
+      .floating-mascot {
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .floating-mascot {
+        animation-duration: .5s;
+      }
+    }
   </style>
 </head>
+
 <body>
 <main>
-  <div class="brand">Quiz Tipis tipis</div>
+  <div class="brand">Quiz Tipis Tipis</div>
 
   <h1>Tung Tung Tung Sahur!</h1>
-  <p>
-    Selamat tengok quiz 0 faedah king sann🥰. Isi pertanyaannya dengan jujur,
-    bang. pls ya🥰
+
+  <p class="intro">
+    Selamat tengok quiz 0 faedah king sann🥰.
+    Isi pertanyaannya dengan jujur, bang. pls ya🥰
   </p>
 
-  <section id="formPanel" class="panel">
+  <section id="formPanel">
+    <hr class="rule">
+    <p class="section-label">Sedikit tentang kamu</p>
+
     <form id="answerForm">
       <label for="name">Nama kamu</label>
       <input id="name" name="name" maxlength="100" required
@@ -253,12 +345,12 @@ body::before {
       <label for="lastAnswer">
         Apa syarat kami menembak kakak? 😈
       </label>
-      <textarea id="lastAnswer" name="lastAnswer" rows="3"
-        maxlength="1000" required
+      <textarea id="lastAnswer" name="lastAnswer"
+        rows="3" maxlength="1000" required
         placeholder="Jawab di sini..."></textarea>
 
       <div class="captcha">
-        <div class="muted">VERIFIKASI ANTI ROBOT 🤖</div>
+        <div class="muted">VERIFIKASI ANTI ROBOT</div>
         <p class="challenge" id="challengeText">
           KETIK ULANG XYZKK
         </p>
@@ -271,37 +363,41 @@ body::before {
       </div>
 
       <button type="submit" id="submitBtn">
-        Kirim jawaban →
+        Kirim jawaban <span aria-hidden="true">→</span>
       </button>
+
       <p id="formStatus" class="muted" role="status"></p>
     </form>
   </section>
 
-  <section id="successPanel" class="panel hide" aria-live="polite">
-    <h2>Jawaban terkirim! ✓</h2>
+  <section id="successPanel" class="hide" aria-live="polite">
+    <hr class="rule">
+    <h2>Jawaban terkirim.</h2>
     <p>
       Makasih udah kenalan. Sekarang tinggal menunggu
       keputusan para sesepuh Tung Tung Club.
     </p>
-    <button class="secondary" id="againBtn">Isi lagi</button>
+    <button class="secondary" id="againBtn" type="button">
+      Isi lagi
+    </button>
   </section>
 
-  <section id="adminPanel" class="panel hide">
+  <section id="adminPanel" class="hide">
+    <hr class="rule">
     <div class="toprow">
       <h2>Dashboard jawaban</h2>
       <button class="secondary" id="closeAdmin" type="button">
         Tutup
       </button>
     </div>
-    <p class="muted">
-      Jawaban yang masuk tersimpan di server.
-    </p>
+
+    <p class="muted">Jawaban yang masuk tersimpan di server.</p>
     <div id="adminStatus" class="notice">Memuat jawaban…</div>
     <div id="answers"></div>
   </section>
 </main>
 
-<footer>sann © TUNG TUNG SAHUR KING</footer>
+<footer>TUNG TUNG CLUB · SANN</footer>
 
 <script>
 (() => {
@@ -313,7 +409,10 @@ body::before {
     'KETIK ULANG ' + challenge.toUpperCase();
 
   const params = new URLSearchParams(location.search);
-  if (params.get('admin') === '1') showAdminPrompt();
+
+  if (params.get('admin') === '1') {
+    showAdminPrompt();
+  }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -432,6 +531,31 @@ body::before {
 
   $('closeAdmin').addEventListener('click', () => {
     $('adminPanel').classList.add('hide');
+  });
+
+  // Efek maskot saat klik di halaman
+  let lastMascotTime = 0;
+
+  document.addEventListener('click', (event) => {
+    // Hindari terlalu banyak gambar jika diklik berkali-kali
+    const now = Date.now();
+    if (now - lastMascotTime < 180) return;
+    lastMascotTime = now;
+
+    const mascot = document.createElement('img');
+    mascot.src = './tungtung.png';
+    mascot.alt = '';
+    mascot.className = 'floating-mascot';
+    mascot.setAttribute('aria-hidden', 'true');
+
+    mascot.style.left = event.clientX + 'px';
+    mascot.style.top = event.clientY + 'px';
+
+    mascot.onerror = () => mascot.remove();
+
+    document.body.appendChild(mascot);
+
+    setTimeout(() => mascot.remove(), 1100);
   });
 })();
 </script>
