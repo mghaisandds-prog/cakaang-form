@@ -21,20 +21,27 @@ jobs:
           node-version: 22
 
       - name: Pasang alat optimasi
-        run: |
-          npm install --no-save html-minifier-terser javascript-obfuscator
+        run: npm install --no-save html-minifier-terser javascript-obfuscator
 
-      - name: Optimasi HTML dan obfuscate JavaScript
+      - name: Minify HTML dan obfuscate JavaScript
         run: |
           node <<'NODE'
           const fs = require('fs');
           const { minify } = require('html-minifier-terser');
           const JavaScriptObfuscator = require('javascript-obfuscator');
 
-          (async () => {
-            const html = fs.readFileSync('index.html', 'utf8');
+          async function main() {
+            const input = 'index.html';
+            const output = 'index.min.html';
 
-            const result = await minify(html, {
+            if (!fs.existsSync(input)) {
+              throw new Error(`File ${input} tidak ditemukan.`);
+            }
+
+            const html = fs.readFileSync(input, 'utf8');
+            let scriptCount = 0;
+
+            const minified = await minify(html, {
               collapseWhitespace: true,
               removeComments: true,
               minifyCSS: true,
@@ -42,32 +49,70 @@ jobs:
               keepClosingSlash: true
             });
 
-            const obfuscated = result.replace(
-              /<script>([\s\S]*?)<\/script>/i,
+            const result = minified.replace(
+              /<script>([\s\S]*?)<\/script>/gi,
               (_, script) => {
-                const output = JavaScriptObfuscator.obfuscate(script, {
+                scriptCount++;
+
+                const code = JavaScriptObfuscator.obfuscate(script, {
                   compact: true,
-                  controlFlowFlattening: false,
-                  deadCodeInjection: false,
+
+                  controlFlowFlattening: true,
+                  controlFlowFlatteningThreshold: 0.75,
+
+                  deadCodeInjection: true,
+                  deadCodeInjectionThreshold: 0.15,
+
+                  identifierNamesGenerator: 'hexadecimal',
+                  renameGlobals: false,
+
                   stringArray: true,
-                  stringArrayThreshold: 0.5,
-                  renameGlobals: false
+                  stringArrayThreshold: 1,
+                  stringArrayEncoding: ['rc4'],
+                  stringArrayRotate: true,
+                  stringArrayShuffle: true,
+                  stringArrayIndexShift: true,
+                  stringArrayWrappersCount: 2,
+                  stringArrayWrappersType: ['function', 'variable'],
+
+                  splitStrings: true,
+                  splitStringsChunkLength: 5,
+
+                  numbersToExpressions: true,
+                  simplify: true,
+                  transformObjectKeys: true,
+
+                  selfDefending: true,
+                  debugProtection: false,
+                  disableConsoleOutput: false
                 }).getObfuscatedCode();
 
-                return '<script>' + output + '</script>';
+                return '<script>' + code + '</script>';
               }
             );
 
-            fs.writeFileSync('index.min.html', obfuscated);
-            console.log('Hasil dibuat: index.min.html');
-          })().catch(error => {
+            if (scriptCount === 0) {
+              throw new Error(
+                'Tidak ada tag <script> polos yang cocok. Periksa pola script di index.html.'
+              );
+            }
+
+            fs.writeFileSync(output, result);
+            console.log(`Berhasil membuat ${output}`);
+            console.log(`Script yang diobfuscate: ${scriptCount}`);
+            console.log(`Ukuran awal: ${Buffer.byteLength(html)} byte`);
+            console.log(`Ukuran hasil: ${Buffer.byteLength(result)} byte`);
+          }
+
+          main().catch(error => {
             console.error(error);
             process.exit(1);
           });
           NODE
 
-      - name: Simpan hasil optimasi
+      - name: Simpan hasil untuk pengujian
         uses: actions/upload-artifact@v4
         with:
           name: optimized-website
           path: index.min.html
+          if-no-files-found: error
