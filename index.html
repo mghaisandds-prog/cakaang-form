@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -197,13 +198,17 @@
   let captchaToken = '';
   let captchaLoading = false;
 
-  async function refreshCaptcha() {
+  async function refreshCaptcha(preserveStatus = false) {
     const btn = $('refreshCaptchaBtn');
     captchaLoading = true;
     btn.disabled = true;
     $('challengeText').textContent = 'Memuat kode...';
     $('captchaInput').value = '';
-    $('formStatus').textContent = '';
+
+    if (!preserveStatus) {
+      $('formStatus').textContent = '';
+      $('formStatus').className = 'muted';
+    }
 
     try {
       const res = await fetch('/.netlify/functions/captcha', {
@@ -221,8 +226,12 @@
     } catch (error) {
       captchaToken = '';
       $('challengeText').textContent = 'CAPTCHA gagal dimuat.';
-      $('formStatus').textContent = error.message || 'Gagal memuat CAPTCHA.';
-      $('formStatus').className = 'muted danger';
+      const status = $('formStatus');
+      const message = error.message || 'Gagal memuat CAPTCHA.';
+      status.textContent = preserveStatus && status.textContent
+        ? status.textContent + ' | ' + message
+        : message;
+      status.className = 'muted danger';
     } finally {
       captchaLoading = false;
       btn.disabled = false;
@@ -230,7 +239,7 @@
   }
 
   refreshCaptcha();
-  $('refreshCaptchaBtn').addEventListener('click', refreshCaptcha);
+  $('refreshCaptchaBtn').addEventListener('click', () => refreshCaptcha());
 
   const params = new URLSearchParams(location.search);
   if (params.get('admin') === '1') showAdminPrompt();
@@ -267,9 +276,13 @@
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
     } catch (err) {
-      $('formStatus').textContent = err.message || 'Gagal mengirim. Coba lagi.';
-      $('formStatus').className = 'muted danger';
-      await refreshCaptcha();
+      const status = $('formStatus');
+      const message = err.message || 'Gagal mengirim. Coba lagi.';
+
+      await refreshCaptcha(true);
+
+      status.textContent = message;
+      status.className = 'muted danger';
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'Kirim jawaban <span aria-hidden="true">→</span>';
