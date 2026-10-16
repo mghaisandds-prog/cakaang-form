@@ -197,6 +197,25 @@
         padding: 17px;
       }
     }
+
+body {
+  position: relative;
+  isolation: isolate;
+  background: #f5ead5;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("./tungtung.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 300px auto;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: -1;
+}
   </style>
 </head>
 <body>
