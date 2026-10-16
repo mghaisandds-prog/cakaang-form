@@ -1,0 +1,52 @@
+
+name: Optimize Website
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil repository
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Optimasi HTML, CSS, dan JavaScript
+        run: |
+          npm install --no-save html-minifier-terser clean-css terser
+          node <<'NODE'
+          const fs = require('fs');
+          const { minify } = require('html-minifier-terser');
+
+          (async () => {
+            const html = fs.readFileSync('index.html', 'utf8');
+            const result = await minify(html, {
+              collapseWhitespace: true,
+              removeComments: true,
+              minifyCSS: true,
+              minifyJS: true,
+              keepClosingSlash: true
+            });
+
+            fs.writeFileSync('index.min.html', result);
+            console.log('Selesai: index.min.html dibuat.');
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Simpan hasil optimasi sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: optimized-website
+          path: index.min.html
