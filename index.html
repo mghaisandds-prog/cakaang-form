@@ -188,6 +188,7 @@
 </main>
 
 <footer>TUNG TUNG CLUB · SANN</footer>
+
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -195,26 +196,20 @@
 
   let captchaToken = '';
   let captchaLoading = false;
-  let lastMascotTime = 0;
 
-  async function refreshCaptcha(preserveStatus = false) {
+  async function refreshCaptcha() {
     const btn = $('refreshCaptchaBtn');
     captchaLoading = true;
     btn.disabled = true;
     $('challengeText').textContent = 'Memuat kode...';
     $('captchaInput').value = '';
-
-    if (!preserveStatus) {
-      $('formStatus').textContent = '';
-      $('formStatus').className = 'muted';
-    }
+    $('formStatus').textContent = '';
 
     try {
       const res = await fetch('/.netlify/functions/captcha', {
         method: 'GET',
         cache: 'no-store'
       });
-
       const result = await res.json();
 
       if (!res.ok || !result.code || !result.token) {
@@ -226,15 +221,8 @@
     } catch (error) {
       captchaToken = '';
       $('challengeText').textContent = 'CAPTCHA gagal dimuat.';
-
-      const message = error.message || 'Gagal memuat CAPTCHA.';
-      const status = $('formStatus');
-
-      status.textContent = preserveStatus && status.textContent
-        ? status.textContent + ' | ' + message
-        : message;
-
-      status.className = 'muted danger';
+      $('formStatus').textContent = error.message || 'Gagal memuat CAPTCHA.';
+      $('formStatus').className = 'muted danger';
     } finally {
       captchaLoading = false;
       btn.disabled = false;
@@ -242,7 +230,7 @@
   }
 
   refreshCaptcha();
-  $('refreshCaptchaBtn').addEventListener('click', () => refreshCaptcha());
+  $('refreshCaptchaBtn').addEventListener('click', refreshCaptcha);
 
   const params = new URLSearchParams(location.search);
   if (params.get('admin') === '1') showAdminPrompt();
@@ -274,29 +262,17 @@
       });
 
       const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.error || 'Pengiriman gagal.');
-      }
+      if (!res.ok) throw new Error(result.error || 'Pengiriman gagal.');
 
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
     } catch (err) {
-  const message = err.message || 'Gagal mengirim. Coba lagi.';
-
-  $('formStatus').textContent =
-    /captcha|verification|kode verifikasi/i.test(message)
-      ? 'CAPTCHA salah atau kedaluwarsa. Silakan masukkan kode baru.'
-      : message;
-
-  $('formStatus').className = 'muted danger';
-
-  await refreshCaptcha(true);
-    }
+      $('formStatus').textContent = err.message || 'Gagal mengirim. Coba lagi.';
+      $('formStatus').className = 'muted danger';
+      await refreshCaptcha();
     } finally {
       btn.disabled = false;
-      btn.innerHTML =
-        'Kirim jawaban <span aria-hidden="true">→</span>';
+      btn.innerHTML = 'Kirim jawaban <span aria-hidden="true">→</span>';
     }
   });
 
@@ -318,7 +294,6 @@
   async function loadAdmin(code) {
     $('adminPanel').classList.remove('hide');
     $('adminStatus').textContent = 'Memuat jawaban...';
-    $('adminStatus').className = 'notice';
     $('answers').innerHTML = '';
 
     try {
@@ -329,13 +304,9 @@
       });
 
       const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Akses ditolak.');
 
-      if (!res.ok) {
-        throw new Error(result.error || 'Akses ditolak.');
-      }
-
-      $('adminStatus').textContent =
-        `Total jawaban: ${result.answers.length}`;
+      $('adminStatus').textContent = `Total jawaban: ${result.answers.length}`;
 
       if (!result.answers.length) {
         $('answers').textContent = 'Belum ada jawaban masuk.';
@@ -365,8 +336,7 @@
         $('answers').appendChild(card);
       });
     } catch (err) {
-      $('adminStatus').textContent =
-        err.message || 'Tidak bisa memuat dashboard.';
+      $('adminStatus').textContent = err.message || 'Tidak bisa memuat dashboard.';
       $('adminStatus').className = 'notice danger';
     }
   }
@@ -374,6 +344,8 @@
   $('closeAdmin').addEventListener('click', () => {
     $('adminPanel').classList.add('hide');
   });
+
+  let lastMascotTime = 0;
 
   document.addEventListener('click', (event) => {
     const now = Date.now();
@@ -393,7 +365,6 @@
     setTimeout(() => mascot.remove(), 1100);
   });
 })();
-      </script>
-          
+</script>
 </body>
 </html>
