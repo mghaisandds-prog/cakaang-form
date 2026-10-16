@@ -84,7 +84,7 @@
       margin-top: 14px; padding: 12px; border: 1px solid var(--line);
       color: var(--text); overflow-wrap: anywhere;
     }
-    .danger { color: #b3261e; }
+    .danger { color: #b3261e !important; }
     .entry {
       margin: 12px 0; padding: 14px; border: 1px solid var(--line);
       background: var(--paper); overflow-wrap: anywhere;
@@ -98,6 +98,16 @@
     #formPanel, #successPanel, #adminPanel {
       margin-top: 30px; padding: 25px 0;
       border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    #formStatus {
+      min-height: 0;
+      margin: 12px 0 0;
+      overflow-wrap: anywhere;
+    }
+    #formStatus:not(:empty) {
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: var(--paper);
     }
     footer {
       max-width: 500px; margin: 32px auto 0; color: var(--muted);
@@ -198,6 +208,12 @@
   let captchaToken = '';
   let captchaLoading = false;
 
+  function showStatus(message, isError = true) {
+    const status = $('formStatus');
+    status.textContent = message;
+    status.className = isError ? 'muted danger' : 'muted';
+  }
+
   async function refreshCaptcha(preserveStatus = false) {
     const btn = $('refreshCaptchaBtn');
     captchaLoading = true;
@@ -205,10 +221,7 @@
     $('challengeText').textContent = 'Memuat kode...';
     $('captchaInput').value = '';
 
-    if (!preserveStatus) {
-      $('formStatus').textContent = '';
-      $('formStatus').className = 'muted';
-    }
+    if (!preserveStatus) showStatus('', false);
 
     try {
       const res = await fetch('/.netlify/functions/captcha', {
@@ -226,12 +239,9 @@
     } catch (error) {
       captchaToken = '';
       $('challengeText').textContent = 'CAPTCHA gagal dimuat.';
-      const status = $('formStatus');
-      const message = error.message || 'Gagal memuat CAPTCHA.';
-      status.textContent = preserveStatus && status.textContent
-        ? status.textContent + ' | ' + message
-        : message;
-      status.className = 'muted danger';
+      if (!preserveStatus) {
+        showStatus(error.message || 'Gagal memuat CAPTCHA.');
+      }
     } finally {
       captchaLoading = false;
       btn.disabled = false;
@@ -248,16 +258,16 @@
     event.preventDefault();
 
     if (captchaLoading || !captchaToken) {
-      $('formStatus').textContent = 'Tunggu CAPTCHA selesai dimuat.';
-      $('formStatus').className = 'muted danger';
+      showStatus('CAPTCHA sedang dimuat. Tunggu sebentar lalu coba lagi.');
       return;
     }
+
+    if (!form.reportValidity()) return;
 
     const btn = $('submitBtn');
     btn.disabled = true;
     btn.textContent = 'Mengirim...';
-    $('formStatus').textContent = '';
-    $('formStatus').className = 'muted';
+    showStatus('', false);
 
     const data = Object.fromEntries(new FormData(form).entries());
     data.captchaInput = data.captchaInput.trim().toUpperCase();
@@ -278,23 +288,35 @@
       }
 
       if (!res.ok) {
-        throw new Error(result.error || 'Pengiriman gagal (HTTP ' + res.status + ').');
+        const serverMessage = result.error || 'Pengiriman gagal.';
+
+        // Tampilkan pesan spesifik CAPTCHA secara langsung.
+        if (/captcha salah/i.test(serverMessage)) {
+          showStatus('CAPTCHA salah, silakan ulangi.');
+        } else if (/captcha kedaluwarsa/i.test(serverMessage)) {
+          showStatus('CAPTCHA kedaluwarsa. Silakan coba kode yang baru.');
+        } else {
+          showStatus(serverMessage + ' (HTTP ' + res.status + ')');
+        }
+
+        // Simpan pesan agar tidak terhapus saat kode diperbarui.
+        const displayedMessage = $('formStatus').textContent;
+        await refreshCaptcha(true);
+        showStatus(displayedMessage);
+        return;
       }
 
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
+
     } catch (err) {
-      const status = $('formStatus');
-      const message = err.message || 'Gagal mengirim. Coba lagi.';
+      const message = err.message || 'Koneksi bermasalah. Silakan coba lagi.';
+      showStatus(message);
 
-      status.textContent = 'DEBUG: ' + message;
-      status.className = 'muted danger';
-
+      const displayedMessage = $('formStatus').textContent;
       await refreshCaptcha(true);
+      showStatus(displayedMessage);
 
-      status.textContent = 'DEBUG: ' + message +
-        (captchaToken ? ' | CAPTCHA diperbarui.' : ' | CAPTCHA gagal diperbarui.');
-      status.className = 'muted danger';
     } finally {
       btn.disabled = false;
       btn.innerHTML = 'Kirim jawaban <span aria-hidden="true">→</span>';
@@ -303,8 +325,7 @@
 
   $('againBtn').addEventListener('click', () => {
     form.reset();
-    $('formStatus').textContent = '';
-    $('formStatus').className = 'muted';
+    showStatus('', false);
     $('successPanel').classList.add('hide');
     $('formPanel').classList.remove('hide');
     refreshCaptcha();
