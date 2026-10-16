@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f8f4ec">
   <title>Tung Tung Club</title>
-
   <style>
     :root {
       --bg: #f8f4ec;
@@ -17,11 +16,7 @@
       --accent: #a34330;
       --soft: #efe5d6;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       padding: 38px 20px 24px;
@@ -30,288 +25,110 @@
       color: var(--text);
       font: 15px/1.65 Arial, sans-serif;
     }
-
-    main {
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
+    main { width: 100%; max-width: 500px; margin: 0 auto; }
     .brand {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      display: flex; align-items: center; gap: 9px;
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
     }
-
     .brand::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      background: var(--accent);
-      border-radius: 50%;
+      content: ""; width: 7px; height: 7px;
+      background: var(--accent); border-radius: 50%;
     }
-
     h1 {
       margin: 28px 0 14px;
       font: 400 clamp(2.5rem, 10vw, 3.7rem)/1.03 Georgia, serif;
       letter-spacing: -1.8px;
     }
-
-    h2 {
-      margin: 0 0 12px;
-      font: 400 1.65rem/1.2 Georgia, serif;
-    }
-
-    p {
-      color: var(--muted);
-    }
-
-    .intro {
-      max-width: 390px;
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.8;
-    }
-
-    .rule {
-      height: 1px;
-      margin: 28px 0;
-      border: 0;
-      background: var(--line);
-    }
-
+    h2 { margin: 0 0 12px; font: 400 1.65rem/1.2 Georgia, serif; }
+    p { color: var(--muted); }
+    .intro { max-width: 390px; margin: 0; font-size: 14px; line-height: 1.8; }
+    .rule { height: 1px; margin: 28px 0; border: 0; background: var(--line); }
     .section-label {
-      margin: 0 0 22px;
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
+      margin: 0 0 22px; color: var(--muted);
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
     }
-
-    label {
-      display: block;
-      margin: 19px 0 7px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    input,
-    textarea {
-      display: block;
-      width: 100%;
-      padding: 12px 13px;
-      border: 1px solid var(--line);
-      border-radius: 3px;
-      background: var(--paper);
-      color: var(--text);
-      font: inherit;
+    label { display: block; margin: 19px 0 7px; font-size: 13px; font-weight: 700; }
+    input, textarea {
+      display: block; width: 100%; padding: 12px 13px;
+      border: 1px solid var(--line); border-radius: 3px;
+      background: var(--paper); color: var(--text); font: inherit;
       transition: border-color .18s;
     }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: #a69a8c;
-    }
-
-    input:focus,
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    textarea {
-      resize: vertical;
-    }
-
+    input::placeholder, textarea::placeholder { color: #a69a8c; }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    textarea { resize: vertical; }
     button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
-      padding: 12px 17px;
-      border: 1px solid var(--accent);
-      border-radius: 3px;
-      background: var(--accent);
-      color: white;
-      font: inherit;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 12px; margin-top: 20px; padding: 12px 17px;
+      border: 1px solid var(--accent); border-radius: 3px;
+      background: var(--accent); color: white; font: inherit;
+      font-size: 13px; font-weight: 700; cursor: pointer;
       transition: background .15s;
     }
-
-    button:hover {
-      background: #853725;
-    }
-
-    button:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
-
-    button.secondary {
-      border-color: var(--line);
-      background: transparent;
-      color: var(--text);
-    }
-
-    button.secondary:hover {
-      background: var(--soft);
-    }
-
-    .muted {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .hide {
-      display: none !important;
-    }
-
+    button:hover { background: #853725; }
+    button:disabled { opacity: .6; cursor: wait; }
+    button.secondary { border-color: var(--line); background: transparent; color: var(--text); }
+    button.secondary:hover { background: var(--soft); }
+    .muted { font-size: 12px; color: var(--muted); }
+    .hide { display: none !important; }
     .captcha {
-      margin-top: 24px;
-      padding: 15px;
-      border: 1px solid var(--line);
-      border-radius: 3px;
-      background: #f1e9dc;
+      margin-top: 24px; padding: 15px; border: 1px solid var(--line);
+      border-radius: 3px; background: #f1e9dc;
     }
-
     .challenge {
-      margin: 8px 0;
-      color: var(--accent);
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 3px;
+      margin: 8px 0; color: var(--accent); font-size: 15px;
+      font-weight: 700; letter-spacing: 3px;
     }
-
     .notice {
-      margin-top: 14px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      color: var(--text);
-      overflow-wrap: anywhere;
+      margin-top: 14px; padding: 12px; border: 1px solid var(--line);
+      color: var(--text); overflow-wrap: anywhere;
     }
-
-    .danger {
-      color: #b3261e;
-    }
-
+    .danger { color: #b3261e; }
     .entry {
-      margin: 12px 0;
-      padding: 14px;
-      border: 1px solid var(--line);
-      background: var(--paper);
-      overflow-wrap: anywhere;
+      margin: 12px 0; padding: 14px; border: 1px solid var(--line);
+      background: var(--paper); overflow-wrap: anywhere;
     }
-
-    .entry h3 {
-      margin: 0 0 8px;
-      font-size: 14px;
-    }
-
-    .entry p {
-      margin: 5px 0;
-      font-size: 13px;
-    }
-
+    .entry h3 { margin: 0 0 8px; font-size: 14px; }
+    .entry p { margin: 5px 0; font-size: 13px; }
     .toprow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
     }
-
-    #formPanel,
-    #successPanel,
-    #adminPanel {
-      margin-top: 30px;
-      padding: 25px 0;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
+    #formPanel, #successPanel, #adminPanel {
+      margin-top: 30px; padding: 25px 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
     }
-
     footer {
-      max-width: 500px;
-      margin: 32px auto 0;
-      color: var(--muted);
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      text-align: center;
+      max-width: 500px; margin: 32px auto 0; color: var(--muted);
+      font-size: 10px; letter-spacing: 1.5px; text-align: center;
     }
-
-    /* Tung Tung muncul sebentar di lokasi klik */
-
     .floating-mascot {
-      position: fixed;
-      z-index: 9999;
-      width: 58px;
-      height: 58px;
-      object-fit: contain;
-      pointer-events: none;
-      user-select: none;
+      position: fixed; z-index: 9999; width: 58px; height: 58px;
+      object-fit: contain; pointer-events: none; user-select: none;
       will-change: transform, opacity;
       animation: sahur-float 1s ease-out forwards;
     }
-
     @keyframes sahur-float {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -15%) scale(.65) rotate(-10deg);
-      }
-
-      20% {
-        opacity: .95;
-        transform: translate(-50%, -50%) scale(1) rotate(5deg);
-      }
-
-      70% {
-        opacity: .7;
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -145%) scale(.85) rotate(12deg);
-      }
+      0% { opacity: 0; transform: translate(-50%, -15%) scale(.65) rotate(-10deg); }
+      20% { opacity: .95; transform: translate(-50%, -50%) scale(1) rotate(5deg); }
+      70% { opacity: .7; }
+      100% { opacity: 0; transform: translate(-50%, -145%) scale(.85) rotate(12deg); }
     }
-
     @media (max-width: 480px) {
-      body {
-        padding: 29px 20px 20px;
-      }
-
-      #formPanel,
-      #successPanel,
-      #adminPanel {
-        padding: 21px 0;
-      }
-
-      .floating-mascot {
-        width: 50px;
-        height: 50px;
-      }
+      body { padding: 29px 20px 20px; }
+      #formPanel, #successPanel, #adminPanel { padding: 21px 0; }
+      .floating-mascot { width: 50px; height: 50px; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-      .floating-mascot {
-        animation-duration: .5s;
-      }
+      .floating-mascot { animation-duration: .5s; }
     }
   </style>
 </head>
-
 <body>
 <main>
   <div class="brand">quiz singkat janji</div>
-
   <h1>Tung Tung Tung Sahur!</h1>
-
   <p class="intro">
     Selamat tengok quiz 0 faedah king sann🥰.
     Isi pertanyaannya dengan jujur, bang. pls ya🥰
@@ -319,53 +136,34 @@
 
   <section id="formPanel">
     <hr class="rule">
-    <p class="section-label">isi pls. </p>
-
+    <p class="section-label">isi pls.</p>
     <form id="answerForm">
       <label for="name">Nama kamu</label>
-      <input id="name" name="name" maxlength="100" required
-        placeholder="Nama panggilan juga boleh">
+      <input id="name" name="name" maxlength="100" required placeholder="Nama panggilan juga boleh">
 
       <label for="hobby">Hobi</label>
-      <input id="hobby" name="hobby" maxlength="180" required
-        placeholder="Contoh: baca, futsal, gambar...">
+      <input id="hobby" name="hobby" maxlength="180" required placeholder="Contoh: baca, futsal, gambar...">
 
       <label for="food">Makanan favorit</label>
-      <input id="food" name="food" maxlength="180" required
-        placeholder="Makanan favoritmu">
+      <input id="food" name="food" maxlength="180" required placeholder="Makanan favoritmu">
 
       <label for="color">Warna favorit</label>
-      <input id="color" name="color" maxlength="100" required
-        placeholder="Warna yang kamu suka">
+      <input id="color" name="color" maxlength="100" required placeholder="Warna yang kamu suka">
 
       <label for="drink">Minuman favorit</label>
-      <input id="drink" name="drink" maxlength="180" required
-        placeholder="Minuman favoritmu">
+      <input id="drink" name="drink" maxlength="180" required placeholder="Minuman favoritmu">
 
-      <label for="lastAnswer">
-        Apa syarat kami menembak kakak? 😈
-      </label>
-      <textarea id="lastAnswer" name="lastAnswer"
-        rows="3" maxlength="1000" required
-        placeholder="Jawab di sini..."></textarea>
+      <label for="lastAnswer">Apa syarat kami menembak kakak? 😈</label>
+      <textarea id="lastAnswer" name="lastAnswer" rows="3" maxlength="1000" required placeholder="Jawab di sini..."></textarea>
 
       <div class="captcha">
         <div class="muted">VERIFIKASI ANTI ROBOT</div>
-        <p class="challenge" id="challengeText">
-          KETIK ULANG XYZKK
-        </p>
-        <label for="captchaInput">
-          Ketik ulang teks setelah "KETIK ULANG"
-        </label>
-        <input id="captchaInput" name="captchaInput"
-          autocomplete="off" required
-          placeholder="Ketik kode di atas">
+        <p class="challenge" id="challengeText">Menyiapkan kode...</p>
+        <label for="captchaInput">Ketik ulang teks setelah "KETIK ULANG"</label>
+        <input id="captchaInput" name="captchaInput" autocomplete="off" required placeholder="Ketik kode di atas">
       </div>
 
-      <button type="submit" id="submitBtn">
-        Kirim jawaban <span aria-hidden="true">→</span>
-      </button>
-
+      <button type="submit" id="submitBtn">Kirim jawaban <span aria-hidden="true">→</span></button>
       <p id="formStatus" class="muted" role="status"></p>
     </form>
   </section>
@@ -373,24 +171,16 @@
   <section id="successPanel" class="hide" aria-live="polite">
     <hr class="rule">
     <h2>Jawaban terkirim.</h2>
-    <p>
-      Makasih udah kenalan. Sekarang tinggal menunggu
-      keputusan para sesepuh Tung Tung Club.
-    </p>
-    <button class="secondary" id="againBtn" type="button">
-      Isi lagi
-    </button>
+    <p>Makasih udah kenalan. Sekarang tinggal menunggu keputusan para sesepuh Tung Tung Club.</p>
+    <button class="secondary" id="againBtn" type="button">Isi lagi</button>
   </section>
 
   <section id="adminPanel" class="hide">
     <hr class="rule">
     <div class="toprow">
       <h2>Dashboard jawaban</h2>
-      <button class="secondary" id="closeAdmin" type="button">
-        Tutup
-      </button>
+      <button class="secondary" id="closeAdmin" type="button">Tutup</button>
     </div>
-
     <p class="muted">Jawaban yang masuk tersimpan di server.</p>
     <div id="adminStatus" class="notice">Memuat jawaban…</div>
     <div id="answers"></div>
@@ -403,25 +193,37 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const form = $('answerForm');
-  const challenge = 'xyzkk';
 
-  $('challengeText').textContent =
-    'KETIK ULANG ' + challenge.toUpperCase();
+  // CAPTCHA acak: huruf yang mudah tertukar tidak digunakan.
+  function generateCaptcha() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    return Array.from({ length: 5 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+  }
+
+  let challenge = '';
+
+  function refreshCaptcha() {
+    challenge = generateCaptcha();
+    $('challengeText').textContent = 'KETIK ULANG ' + challenge;
+    $('captchaInput').value = '';
+  }
+
+  // Buat CAPTCHA saat halaman pertama kali dibuka.
+  refreshCaptcha();
 
   const params = new URLSearchParams(location.search);
-
-  if (params.get('admin') === '1') {
-    showAdminPrompt();
-  }
+  if (params.get('admin') === '1') showAdminPrompt();
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     const typed = $('captchaInput').value.trim();
 
-    if (typed.toLowerCase() !== challenge) {
-      $('formStatus').textContent =
-        'CAPTCHA salah, bang. Coba lagi!';
+    if (typed.toUpperCase() !== challenge) {
+      refreshCaptcha();
+      $('formStatus').textContent = 'CAPTCHA salah, bang. Kodenya sudah diganti, coba lagi!';
       $('formStatus').className = 'muted danger';
       $('captchaInput').focus();
       return;
@@ -432,9 +234,7 @@
     btn.textContent = 'Mengirim...';
     $('formStatus').textContent = '';
 
-    const data = Object.fromEntries(
-      new FormData(form).entries()
-    );
+    const data = Object.fromEntries(new FormData(form).entries());
 
     try {
       const res = await fetch('/.netlify/functions/submit', {
@@ -444,26 +244,25 @@
       });
 
       const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.error || 'Pengiriman gagal.');
-      }
+      if (!res.ok) throw new Error(result.error || 'Pengiriman gagal.');
 
       $('formPanel').classList.add('hide');
       $('successPanel').classList.remove('hide');
     } catch (err) {
-      $('formStatus').textContent =
-        err.message || 'Gagal mengirim. Coba lagi.';
+      $('formStatus').textContent = err.message || 'Gagal mengirim. Coba lagi.';
       $('formStatus').className = 'muted danger';
+      refreshCaptcha();
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Kirim jawaban →';
+      btn.innerHTML = 'Kirim jawaban <span aria-hidden="true">→</span>';
     }
   });
 
   $('againBtn').addEventListener('click', () => {
     form.reset();
+    refreshCaptcha();
     $('formStatus').textContent = '';
+    $('formStatus').className = 'muted';
     $('successPanel').classList.add('hide');
     $('formPanel').classList.remove('hide');
   });
@@ -487,13 +286,9 @@
       });
 
       const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Akses ditolak.');
 
-      if (!res.ok) {
-        throw new Error(result.error || 'Akses ditolak.');
-      }
-
-      $('adminStatus').textContent =
-        `Total jawaban: ${result.answers.length}`;
+      $('adminStatus').textContent = `Total jawaban: ${result.answers.length}`;
 
       if (!result.answers.length) {
         $('answers').textContent = 'Belum ada jawaban masuk.';
@@ -523,8 +318,7 @@
         $('answers').appendChild(card);
       });
     } catch (err) {
-      $('adminStatus').textContent =
-        err.message || 'Tidak bisa memuat dashboard.';
+      $('adminStatus').textContent = err.message || 'Tidak bisa memuat dashboard.';
       $('adminStatus').className = 'notice danger';
     }
   }
@@ -533,11 +327,10 @@
     $('adminPanel').classList.add('hide');
   });
 
-  // Efek maskot saat klik di halaman
+  // Efek maskot saat halaman diklik.
   let lastMascotTime = 0;
 
   document.addEventListener('click', (event) => {
-    // Hindari terlalu banyak gambar jika diklik berkali-kali
     const now = Date.now();
     if (now - lastMascotTime < 180) return;
     lastMascotTime = now;
@@ -547,17 +340,15 @@
     mascot.alt = '';
     mascot.className = 'floating-mascot';
     mascot.setAttribute('aria-hidden', 'true');
-
     mascot.style.left = event.clientX + 'px';
     mascot.style.top = event.clientY + 'px';
-
     mascot.onerror = () => mascot.remove();
 
     document.body.appendChild(mascot);
-
     setTimeout(() => mascot.remove(), 1100);
   });
 })();
 </script>
 </body>
 </html>
+
