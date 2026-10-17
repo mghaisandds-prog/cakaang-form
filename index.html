@@ -78,7 +78,17 @@
     }
     .challenge {
       margin: 8px 0; color: var(--accent); font-size: 15px;
-      font-weight: 700; letter-spacing: 3px;
+      font-weight: 700;
+    }
+    .challenge-image {
+      display: block;
+      width: 240px;
+      max-width: 100%;
+      height: auto;
+      margin: 8px 0;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: #f1e9dc;
     }
     .notice {
       margin-top: 14px; padding: 12px; border: 1px solid var(--line);
@@ -168,13 +178,37 @@
 
       <div class="captcha">
         <div class="muted">VERIFIKASI ANTI ROBOT</div>
-        <p class="challenge" id="challengeText">Menyiapkan kode...</p>
-        <button class="secondary" type="button" id="refreshCaptchaBtn">Ganti kode ↻</button>
-        <label for="captchaInput">Ketik ulang kode di atas</label>
-        <input id="captchaInput" name="captchaInput" autocomplete="off" required placeholder="Ketik kode di atas">
+
+        <img
+          id="challengeImage"
+          class="challenge-image"
+          alt="Gambar CAPTCHA"
+          width="240"
+          height="84"
+        >
+
+        <p class="challenge" id="challengeText">
+          Menyiapkan CAPTCHA...
+        </p>
+
+        <button class="secondary" type="button" id="refreshCaptchaBtn">
+          Ganti kode ↻
+        </button>
+
+        <label for="captchaInput">Ketik ulang kode pada gambar</label>
+        <input
+          id="captchaInput"
+          name="captchaInput"
+          autocomplete="off"
+          autocapitalize="characters"
+          required
+          placeholder="Ketik kode pada gambar"
+        >
       </div>
 
-      <button type="submit" id="submitBtn">Kirim jawaban <span aria-hidden="true">→</span></button>
+      <button type="submit" id="submitBtn">
+        Kirim jawaban <span aria-hidden="true">→</span>
+      </button>
       <p id="formStatus" class="muted" role="status" aria-live="polite"></p>
     </form>
   </section>
@@ -207,6 +241,7 @@
 
   let captchaToken = '';
   let captchaLoading = false;
+  let captchaRequestId = 0;
 
   function showStatus(message, isError = true) {
     const status = $('formStatus');
@@ -216,9 +251,15 @@
 
   async function refreshCaptcha(preserveStatus = false) {
     const btn = $('refreshCaptchaBtn');
+    const image = $('challengeImage');
+    const message = $('challengeText');
+    const requestId = ++captchaRequestId;
+
     captchaLoading = true;
+    captchaToken = '';
     btn.disabled = true;
-    $('challengeText').textContent = 'Memuat kode...';
+    image.removeAttribute('src');
+    message.textContent = 'Memuat CAPTCHA...';
     $('captchaInput').value = '';
 
     if (!preserveStatus) showStatus('', false);
@@ -228,28 +269,49 @@
         method: 'GET',
         cache: 'no-store'
       });
+
       const result = await res.json();
 
-      if (!res.ok || !result.code || !result.token) {
+      if (
+        !res.ok ||
+        typeof result.token !== 'string' ||
+        typeof result.image !== 'string' ||
+        !result.image.startsWith('data:image/png;base64,')
+      ) {
         throw new Error(result.error || 'Gagal memuat CAPTCHA.');
       }
 
-      $('challengeText').textContent = 'KETIK ULANG ' + result.code;
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = result.image;
+      });
+
+      if (requestId !== captchaRequestId) return;
+
       captchaToken = result.token;
+      message.textContent = 'Ketik kode yang terlihat pada gambar.';
     } catch (error) {
+      if (requestId !== captchaRequestId) return;
+
       captchaToken = '';
-      $('challengeText').textContent = 'CAPTCHA gagal dimuat.';
+      message.textContent = 'CAPTCHA gagal dimuat. Tekan Ganti kode.';
       if (!preserveStatus) {
         showStatus(error.message || 'Gagal memuat CAPTCHA.');
       }
     } finally {
-      captchaLoading = false;
-      btn.disabled = false;
+      if (requestId === captchaRequestId) {
+        captchaLoading = false;
+        btn.disabled = false;
+      }
     }
   }
 
   refreshCaptcha();
-  $('refreshCaptchaBtn').addEventListener('click', () => refreshCaptcha());
+
+  $('refreshCaptchaBtn').addEventListener('click', () => {
+    refreshCaptcha();
+  });
 
   const params = new URLSearchParams(location.search);
   if (params.get('admin') === '1') showAdminPrompt();
@@ -284,13 +346,14 @@
       try {
         result = await res.json();
       } catch {
-        throw new Error('Respons server tidak terbaca (HTTP ' + res.status + ').');
+        throw new Error(
+          'Respons server tidak terbaca (HTTP ' + res.status + ').'
+        );
       }
 
       if (!res.ok) {
         const serverMessage = result.error || 'Pengiriman gagal.';
 
-        // Tampilkan pesan spesifik CAPTCHA secara langsung.
         if (/captcha salah/i.test(serverMessage)) {
           showStatus('CAPTCHA salah, silakan ulangi.');
         } else if (/captcha kedaluwarsa/i.test(serverMessage)) {
@@ -299,7 +362,6 @@
           showStatus(serverMessage + ' (HTTP ' + res.status + ')');
         }
 
-        // Simpan pesan agar tidak terhapus saat kode diperbarui.
         const displayedMessage = $('formStatus').textContent;
         await refreshCaptcha(true);
         showStatus(displayedMessage);
@@ -340,7 +402,7 @@
   async function loadAdmin(code) {
     $('adminPanel').classList.remove('hide');
     $('adminStatus').textContent = 'Memuat jawaban...';
-    $('answers').innerHTML = '';
+    $('answers').replaceChildren();
 
     try {
       const res = await fetch('/.netlify/functions/dashboard', {
@@ -352,7 +414,8 @@
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Akses ditolak.');
 
-      $('adminStatus').textContent = `Total jawaban: ${result.answers.length}`;
+      $('adminStatus').textContent =
+        `Total jawaban: ${result.answers.length}`;
 
       if (!result.answers.length) {
         $('answers').textContent = 'Belum ada jawaban masuk.';
@@ -382,7 +445,8 @@
         $('answers').appendChild(card);
       });
     } catch (err) {
-      $('adminStatus').textContent = err.message || 'Tidak bisa memuat dashboard.';
+      $('adminStatus').textContent =
+        err.message || 'Tidak bisa memuat dashboard.';
       $('adminStatus').className = 'notice danger';
     }
   }
