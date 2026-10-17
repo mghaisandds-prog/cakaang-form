@@ -6,18 +6,55 @@ const json = (status, body) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
     },
   });
+
+const MAX_BODY_SIZE = 8192;
+const CAPTCHA_TTL = 5 * 60 * 1000;
 
 export default async (request) => {
   if (request.method !== "POST") {
     return json(405, { error: "Method tidak diizinkan." });
   }
 
+  // Batasi ukuran body jika Content-Length tersedia.
+  const contentLength = Number(request.headers.get("content-length"));
+
+  if (
+    request.headers.get("content-length") &&
+    (!Number.isFinite(contentLength) ||
+      contentLength < 0 ||
+      contentLength > MAX_BODY_SIZE)
+  ) {
+    return json(413, { error: "Data terlalu besar." });
+  }
+
   try {
-    const data = await request.json();
+    // Baca body sebagai teks agar ukuran aktual juga diperiksa.
+    const rawBody = await request.text();
+
+    if (rawBody.length > MAX_BODY_SIZE) {
+      return json(413, { error: "Data terlalu besar." });
+    }
+
+    let data;
+
+    try {
+      data = JSON.parse(rawBody);
+    } catch {
+      return json(400, { error: "Format data tidak valid." });
+    }
+
+    if (
+      !data ||
+      typeof data !== "object" ||
+      Array.isArray(data)
+    ) {
+      return json(400, { error: "Format data tidak valid." });
+    }
 
     const fields = [
       "name",
@@ -28,36 +65,40 @@ export default async (request) => {
       "lastAnswer",
     ];
 
+    const answer = {};
+
     for (const field of fields) {
-      if (
-        typeof data[field] !== "string" ||
-        !data[field].trim()
-      ) {
+      const value = data[field];
+
+      if (typeof value !== "string" || !value.trim()) {
         return json(400, {
           error: "Semua pertanyaan wajib diisi.",
         });
       }
 
       const maxLength = field === "lastAnswer" ? 1000 : 180;
+      const cleaned = value.trim();
 
-      if (data[field].length > maxLength) {
+      if (cleaned.length > maxLength) {
         return json(400, {
           error: "Ada jawaban yang terlalu panjang.",
         });
       }
+
+      answer[field] = cleaned;
     }
 
-    // Validasi CAPTCHA dari server
     const token = data.captchaToken;
     const typed = data.captchaInput;
 
     if (
       typeof token !== "string" ||
-      typeof typed !== "string"
+      token.length > 100 ||
+      !/^[a-f0-9-]{36}$/i.test(token) ||
+      typeof typed !== "string" ||
+      typed.length > 20
     ) {
-      return json(400, {
-        error: "CAPTCHA tidak valid.",
-      });
+      return json(400, { error: "CAPTCHA tidak valid." });
     }
 
     const captchaStore = getStore("cakaang-captcha");
@@ -65,19 +106,31 @@ export default async (request) => {
       type: "json",
     });
 
-    if (!captcha) {
+    if (
+      !captcha ||
+      typeof captcha.code !== "string" ||
+      typeof captcha.createdAt !== "number" ||
+      !Number.isFinite(captcha.createdAt)
+    ) {
       return json(400, {
         error: "CAPTCHA kedaluwarsa. Silakan coba lagi.",
       });
     }
 
-    // Token hanya boleh digunakan sekali
+    // Hapus token sebelum memeriksa jawaban.
+    // Ini mengurangi peluang penggunaan ulang token.
     await captchaStore.delete(token);
 
-    if (Date.now() - captcha.createdAt > 5 * 60 * 1000) {
+    const age = Date.now() - captcha.createdAt;
+
+    if (age < 0 || age > CAPTCHA_TTL) {
       return json(400, {
         error: "CAPTCHA kedaluwarsa. Silakan coba lagi.",
       });
+    }
+
+    if (!/^[A-Z0-9]{5}$/.test(captcha.code)) {
+      return json(400, { error: "CAPTCHA tidak valid." });
     }
 
     if (typed.trim().toUpperCase() !== captcha.code) {
@@ -86,18 +139,9 @@ export default async (request) => {
       });
     }
 
+    answer.createdAt = new Date().toISOString();
+
     const store = getStore("cakaang-answers");
-
-    const answer = {
-      name: data.name.trim(),
-      hobby: data.hobby.trim(),
-      food: data.food.trim(),
-      color: data.color.trim(),
-      drink: data.drink.trim(),
-      lastAnswer: data.lastAnswer.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
     await store.setJSON(randomUUID(), answer);
 
     return json(200, { ok: true });
