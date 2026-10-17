@@ -47,7 +47,10 @@ export default async (request) => {
     } catch {
       return json(400, { error: "Format data tidak valid." });
     }
-
+if (data && typeof data === "object" && data.website) {
+  return json(400, { error: "Permintaan ditolak." });
+}
+    
     if (
       !data ||
       typeof data !== "object" ||
